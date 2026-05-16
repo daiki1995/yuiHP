@@ -103,27 +103,8 @@
       <section id="menu" class="section section-in">
         <div class="container">
           <h2>メニュー</h2>
-          <div class="menu-grid">
-            <article class="card">
-              <h3>Drink</h3>
-              <ul>
-                <li>ハンドドリップコーヒー</li>
-                <li>季節の紅茶</li>
-                <li>ハーブティー</li>
-                <li>自家製ジンジャーエール</li>
-              </ul>
-            </article>
-            <article class="card">
-              <h3>Food</h3>
-              <ul>
-                <li>自製おやつ（日替わり）</li>
-                <li>バタートーストセット</li>
-                <li>はちみつシナモントースト</li>
-                <li>季節のスーププレート</li>
-              </ul>
-            </article>
-          </div>
-          <p class="note">お茶の香りと会話がゆっくり続く、やさしいラインナップです。</p>
+          <div id="menu-grid" class="menu-grid"></div>
+          <p id="menu-note" class="note"></p>
         </div>
       </section>
 
@@ -226,6 +207,43 @@
     </aside>
 
     <script>
+      // ── メニュー読み込み ──────────────────────────────
+      fetch('menu.json')
+        .then((res) => res.json())
+        .then((data) => {
+          const grid = document.getElementById('menu-grid');
+          const note = document.getElementById('menu-note');
+
+          data.categories.forEach((cat) => {
+            const article = document.createElement('article');
+            article.className = 'card';
+            const h3 = document.createElement('h3');
+            h3.textContent = cat.name;
+            const ul = document.createElement('ul');
+            cat.items.forEach((item) => {
+              const li = document.createElement('li');
+              if (typeof item === 'string') {
+                li.textContent = item;
+              } else {
+                li.innerHTML = `<span class="menu-item-name">${item.name}</span>`
+                  + (item.price ? `<span class="menu-item-price">${item.price}</span>` : '')
+                  + (item.note ? `<span class="menu-item-note">${item.note}</span>` : '');
+              }
+              ul.appendChild(li);
+            });
+            article.appendChild(h3);
+            article.appendChild(ul);
+            grid.appendChild(article);
+          });
+
+          if (data.note) note.textContent = data.note;
+        })
+        .catch(() => {
+          const grid = document.getElementById('menu-grid');
+          grid.innerHTML = '<p>メニューを読み込めませんでした。</p>';
+        });
+
+      // ── ヘッダー開閉 ─────────────────────────────────
       const siteHeader = document.querySelector('.site-header');
       const headerToggle = document.querySelector('.header-toggle');
       const navLinks = document.querySelectorAll('#main-nav a');
